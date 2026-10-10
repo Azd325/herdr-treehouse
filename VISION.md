@@ -20,6 +20,7 @@ A rule under "Proposals" is not decided.
 ### Content of the line
 
 - Slot, state, branch. Example: `🌳 research#1 · in-use · fm/fix-x`.
+- The slot value starts with the tree symbol (`🌳 research#1`); the full line holds the symbol one time. For a narrow sidebar the layout has three rows: workspace, then slot and state, then the Herdr branch row.
 - The content is configurable. The plugin reports one token for each value and one token for the full line. The user selects and orders the tokens in the Herdr `config.toml`.
 
 ### Refresh
@@ -42,7 +43,9 @@ A rule under "Proposals" is not decided.
 
 - Name: `herdr-treehouse`. Plugin id: `azd325.treehouse`.
 - Owner: the GitHub account `Azd325`.
-- The repository is local. Publication is not decided.
+- The repository is local until publication. The plugin is used for some days first; the publication is a decision of the owner.
+- After publication, the checks workflow must pass on Linux and macOS, and one install from the public repository must pass in a clean, separate Herdr session.
+- The marketplace topic `herdr-plugin` is a separate last step, on the owner's word.
 - Licence: MIT.
 - A checks workflow exists since the public-release preparation of 2026-10-10.
 
