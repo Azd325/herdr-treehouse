@@ -1,6 +1,6 @@
 id = "azd325.treehouse"
 name = "Treehouse"
-version = "0.1.0"
+version = "0.1.1"
 min_herdr_version = "0.7.5"
 description = "Show the Treehouse worktree slot, state and branch of each workspace in the sidebar"
 platforms = ["macos", "linux"]

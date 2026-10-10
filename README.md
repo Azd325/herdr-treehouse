@@ -35,7 +35,7 @@ All token names start with `th_`.
 | Token | Value | Example |
 | --- | --- | --- |
 | `$th_line` | Slot, state and branch in one value | `🌳 research#1 · in-use · fm/fix-x` |
-| `$th_slot` | Project and slot name | `research#1` |
+| `$th_slot` | Tree symbol, project and slot name | `🌳 research#1` |
 | `$th_state` | State of the slot | `in-use` |
 | `$th_branch` | Branch of the slot, or `detached` | `fm/fix-x` |
 
@@ -46,7 +46,8 @@ All token names start with `th_`.
   The directory is `foreground_cwd`, or `cwd` when Herdr reports no `foreground_cwd`.
   The first such pane in the order of `herdr pane list` gives the tokens.
 - A workspace that is not in a slot has no token. The plugin clears the tokens when a workspace leaves a slot.
-- Herdr keeps 80 characters of a value. The plugin cuts a longer `$th_line` and ends it with `…`.
+- Herdr keeps 80 characters of a value; the tree symbol counts as one character. The plugin cuts a longer `$th_line` and ends it with `…`.
+  For `$th_slot`, it cuts a long project name so that the symbol and slot name stay.
 
 Treehouse reports `you're here` for the slot that contains the directory of the caller.
 The caller is the plugin, so this value says nothing about your pane.
@@ -87,6 +88,17 @@ rows = [
   ["state_icon", "workspace"],
   ["branch", "git_status"],
   ["$th_line"],
+]
+```
+
+For a narrow sidebar, show the workspace, then the slot and state, then Herdr's own branch row:
+
+```toml
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", "workspace"],
+  ["$th_slot", "$th_state"],
+  ["branch", "git_status"],
 ]
 ```
 
@@ -165,6 +177,7 @@ herdr plugin log list --plugin azd325.treehouse
 
 ```sh
 sh test/run.sh
+TEST_SHELL=dash dash test/run.sh
 ```
 
 The tests run `bin/refresh.sh` with the fake `herdr` and `treehouse` commands of `test/bin` on a test `PATH`.

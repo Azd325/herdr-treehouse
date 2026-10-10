@@ -10,7 +10,7 @@ unset HERDR_BIN_PATH HERDR_PLUGIN_STATE_DIR
 
 here=$(cd "$(dirname "$0")" && pwd -P)
 plugin=${here%/*}
-shell=$(command -v sh)
+shell=$(command -v "${TEST_SHELL:-sh}")
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
@@ -104,15 +104,15 @@ test_slot_workspaces_get_all_tokens() {
   refresh
   expect_reports <<'EOF'
 w1 set th_line=🌳 research#1 · in-use · fm/fix-x
-w1 set th_slot=research#1
+w1 set th_slot=🌳 research#1
 w1 set th_state=in-use
 w1 set th_branch=fm/fix-x
 w3 set th_line=🌳 research#2 · in-use · detached
-w3 set th_slot=research#2
+w3 set th_slot=🌳 research#2
 w3 set th_state=in-use
 w3 set th_branch=detached
 w4 set th_line=🌳 api#1 · leased · feat/login
-w4 set th_slot=api#1
+w4 set th_slot=🌳 api#1
 w4 set th_state=leased
 w4 set th_branch=feat/login
 EOF
@@ -162,6 +162,37 @@ test_unchanged_values_are_not_reported() {
   check 'herdr calls' '' "$(cat "$t/fake/calls.log")"
 }
 
+test_old_slot_value_is_updated_on_the_next_run() {
+  refresh_until_reported
+  edit workspace-list.json '.result.workspaces[0].tokens.th_slot = "research#1"'
+  refresh
+  expect_reports <<'EOF'
+w1 set th_slot=🌳 research#1
+EOF
+}
+
+test_slot_has_a_symbol_and_line_has_exactly_one() {
+  refresh
+  check 'slot prefix' '🌳 ' "$(reported_value w1 th_slot | jq -Rr '.[0:2]')"
+  check 'symbols in line' 1 "$(reported_value w1 th_line | jq -Rr '[scan("🌳")] | length')"
+}
+
+test_long_project_keeps_symbol_and_slot_within_80_characters() {
+  project=$(jq -nr '"é" * 100')
+  long_path="$root/pools/research-6310cd/1/$project"
+  mkdir -p "$long_path"
+  edit treehouse/research.json '.[0] |= (.path = $path | .name = "12")' --arg path "$long_path"
+  edit pane-list.json '.result.panes[0] |= (.cwd = $path | .foreground_cwd = $path)' --arg path "$long_path"
+  refresh
+  check 'long slot' "$(jq -nr '"🌳 " + ("é" * 75) + "#12"')" "$(reported_value w1 th_slot)"
+  check 'unchanged long line' "$(jq -nr '"🌳 " + ("é" * 77) + "…"')" "$(reported_value w1 th_line)"
+  check 'length of th_slot' 80 "$(reported_value w1 th_slot | jq -Rr length)"
+  apply_reports_to_workspace_list
+  reset_logs
+  refresh
+  expect_reports </dev/null
+}
+
 test_changed_state_reports_only_the_changed_tokens() {
   refresh_until_reported
   edit treehouse/research.json '.[0].status = "leased"'
@@ -198,11 +229,12 @@ test_without_a_state_directory_only_changes_are_reported() {
 
 test_stale_tokens_outside_a_slot_are_cleared() {
   edit workspace-list.json \
-    '.result.workspaces[1].tokens = {th_line: "🌳 old#7 · dirty", th_state: "dirty", jj_status: "*2"}'
+    '.result.workspaces[1].tokens = {th_line: "🌳 old#7 · dirty", th_slot: "old#7", th_state: "dirty", jj_status: "*2"}'
   refresh
   check 'reports for w2' "$(
     cat <<'EOF'
 w2 clear th_line
+w2 clear th_slot
 w2 clear th_state
 EOF
   )" "$(grep '^w2 ' "$t/fake/reports.log")"
@@ -260,7 +292,7 @@ test_youre_here_without_processes_stays() {
 test_pane_without_foreground_cwd_uses_cwd() {
   edit pane-list.json 'del(.result.panes[0].foreground_cwd)'
   refresh
-  check 'slot of w1' 'research#1' "$(reported_value w1 th_slot)"
+  check 'slot of w1' '🌳 research#1' "$(reported_value w1 th_slot)"
 }
 
 test_foreground_cwd_outside_a_slot_gives_no_token() {
@@ -280,21 +312,21 @@ test_pane_directory_through_a_symlink_matches() {
   ln -s "$root/pools" "$root/link"
   edit pane-list.json '.result.panes[0].foreground_cwd |= sub("/pools/"; "/link/")'
   refresh
-  check 'slot of w1' 'research#1' "$(reported_value w1 th_slot)"
+  check 'slot of w1' '🌳 research#1' "$(reported_value w1 th_slot)"
 }
 
 test_slot_path_through_a_symlink_matches() {
   ln -s "$root/pools" "$root/link"
   edit treehouse/research.json '.[].path |= sub("/pools/"; "/link/")'
   refresh
-  check 'slot of w1' 'research#1' "$(reported_value w1 th_slot)"
+  check 'slot of w1' '🌳 research#1' "$(reported_value w1 th_slot)"
 }
 
 test_pane_in_a_subdirectory_of_a_slot_matches() {
   mkdir -p "$root/pools/research-6310cd/1/research/docs"
   edit pane-list.json '.result.panes[0].foreground_cwd += "/docs"'
   refresh
-  check 'slot of w1' 'research#1' "$(reported_value w1 th_slot)"
+  check 'slot of w1' '🌳 research#1' "$(reported_value w1 th_slot)"
 }
 
 test_long_values_keep_80_characters_and_compare_equal() {
@@ -314,7 +346,7 @@ test_herdr_bin_path_is_used() {
   rm "$t/bin/herdr"
   herdr_bin="$here/bin/herdr"
   refresh
-  check 'slot of w1' 'research#1' "$(reported_value w1 th_slot)"
+  check 'slot of w1' '🌳 research#1' "$(reported_value w1 th_slot)"
 }
 
 test_missing_treehouse_reports_nothing() {
@@ -364,7 +396,7 @@ test_unknown_treehouse_form_leaves_its_workspaces_untouched() {
 test_unknown_form_of_one_pool_does_not_stop_the_other_pool() {
   edit treehouse/research.json '{worktrees: .}'
   refresh
-  check 'slot of w4' 'api#1' "$(reported_value w4 th_slot)"
+  check 'slot of w4' '🌳 api#1' "$(reported_value w4 th_slot)"
   check 'reports for w1 and w3' '' "$(grep '^w[13] ' "$t/fake/reports.log")"
 }
 

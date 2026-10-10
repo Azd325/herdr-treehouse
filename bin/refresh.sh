@@ -40,11 +40,11 @@ note=''
 : >"$work/resolved"
 
 # Records in known, fields separated by US:
-#   slot, slot directory, slot label, state, branch
+#   slot, slot directory, slot label, state, branch, original line label
 #   none, directory outside a slot
 #   unknown, directory with a status of unknown form
 lookup() {
-  while IFS=$US read -r kind path slot state branch; do
+  while IFS=$US read -r kind path slot state branch line_slot; do
     case $kind in
       slot)
         case "$1/" in
@@ -72,33 +72,38 @@ ask_treehouse() {
   if ! jq -r --arg here "you're here" '
     def trim: sub("^\\s+"; "") | sub("\\s+$"; "");
     def clean: gsub("\\p{Cc}"; "") | trim | .[0:80] | trim;
+    def slot:
+      (.name | clean | .[0:77] | trim | "#" + .) as $suffix
+      | (.path | sub("/+$"; "") | split("/") | last | clean) as $project
+      | "🌳 " + $project[0:([0, 78 - ($suffix | length)] | max)] + $suffix;
     if type == "array" then .[] else error("form") end
     | if type == "object" and ([.name, .path, .status] | all(type == "string"))
       then . else error("form") end
     | select(.path | test("\\p{Cc}") | not)
     | [ .path,
-        ((.path | sub("/+$"; "") | split("/") | last) + "#" + .name | clean),
+        slot,
         (if .status == $here and ((.processes // []) | length) > 0
          then "in-use" else .status end | clean),
         (if (.branch | type) == "string" and .branch != "" then .branch
          elif .detached == true then "detached"
-         else "" end | clean) ]
+         else "" end | clean),
+        ((.path | sub("/+$"; "") | split("/") | last) + "#" + .name | clean) ]
     | join("\u001f")
   ' "$work/status.json" >"$work/pool" 2>/dev/null; then
     note='unknown form of treehouse status --json, no token reported for its workspaces'
     printf 'unknown%s%s\n' "$US" "$1" >>"$work/known"
     return
   fi
-  while IFS=$US read -r path slot state branch; do
+  while IFS=$US read -r path slot state branch line_slot; do
     root=$(cd "$path" 2>/dev/null && pwd -P) || root=$path
-    printf 'slot%s%s%s%s%s%s%s%s\n' \
-      "$US" "$root" "$US" "$slot" "$US" "$state" "$US" "$branch" >>"$work/known"
+    printf 'slot%s%s%s%s%s%s%s%s%s%s\n' \
+      "$US" "$root" "$US" "$slot" "$US" "$state" "$US" "$branch" "$US" "$line_slot" >>"$work/known"
   done <"$work/pool"
   printf 'none%s%s\n' "$US" "$1" >>"$work/known"
 }
 
 while IFS=$US read -r workspace dir; do
-  kind=unknown slot='' state='' branch=''
+  kind=unknown slot='' state='' branch='' line_slot=''
   if [ -n "$dir" ]; then
     if physical=$(cd "$dir" 2>/dev/null && pwd -P); then
       lookup "$physical" || {
@@ -109,8 +114,8 @@ while IFS=$US read -r workspace dir; do
       kind=none
     fi
   fi
-  printf '%s%s%s%s%s%s%s%s%s\n' \
-    "$workspace" "$US" "$kind" "$US" "$slot" "$US" "$state" "$US" "$branch" >>"$work/resolved"
+  printf '%s%s%s%s%s%s%s%s%s%s%s\n' \
+    "$workspace" "$US" "$kind" "$US" "$slot" "$US" "$state" "$US" "$branch" "$US" "$line_slot" >>"$work/resolved"
 done <"$work/panes"
 
 # A token keeps its time limit from the report that set it. A report of all
@@ -142,7 +147,7 @@ jq -r --rawfile resolved "$work/resolved" --argjson keepalive "$keepalive" '
   | ([$mine[] | select(.[1] == "slot")] | first) as $hit
   | if $hit then
       {th_slot: $hit[2], th_state: $hit[3], th_branch: $hit[4]}
-      | .th_line = ("🌳 " + ([.th_slot, .th_state, .th_branch] | map(select(. != "")) | join(" · ")) | cap)
+      | .th_line = ("🌳 " + ([$hit[5], .th_state, .th_branch] | map(select(. != "")) | join(" · ")) | cap)
     elif ($mine | length) == 0 or any($mine[]; .[1] == "unknown") then empty
     else {} end
   | . as $want
