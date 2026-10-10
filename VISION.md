@@ -44,6 +44,7 @@ A rule under "Proposals" is not decided.
 - Owner: the GitHub account `Azd325`.
 - The repository is local. Publication is not decided.
 - Licence: MIT.
+- A checks workflow exists since the public-release preparation of 2026-10-10.
 
 ### Not in the first version
 
@@ -53,7 +54,6 @@ A rule under "Proposals" is not decided.
 - A background refresh.
 - Tokens for the lease holder and for the pool count.
 - A change to Treehouse or to Firstmate.
-- A CI workflow.
 
 ## Proposals
 

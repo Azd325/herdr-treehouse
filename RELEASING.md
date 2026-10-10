@@ -1,0 +1,23 @@
+# Releasing
+
+Releases are SemVer-tagged GitHub source releases, with no binary assets.
+Publication is a separate maintainer decision; this checklist does not authorize it.
+
+- [ ] Start from a clean `main` checkout and run the checks in
+      [CONTRIBUTING.md](CONTRIBUTING.md). Confirm the Linux and macOS GitHub
+      checks passed, and record which live environments were actually tested.
+- [ ] Review tracked files and commit messages for private paths, names,
+      hosts, credentials, and captured session data.
+- [ ] Set the version in `herdr-plugin.toml` and update [CHANGELOG.md](CHANGELOG.md).
+      Commit and validate the release preparation.
+- [ ] Create a signed tag on the checked commit, using the manifest version:
+
+  ```sh
+  git tag -s v0.1.1 -m 'herdr-treehouse 0.1.1'
+  git verify-tag v0.1.1
+  ```
+
+- [ ] Publish the tag and create a GitHub source release for that tag, with
+      changelog notes and no attached binaries. Verify the source archives.
+- [ ] Enable GitHub private vulnerability reporting and add the `herdr-plugin`
+      repository topic so Herdr users can discover the plugin.

@@ -1,0 +1,37 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install tools (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq dash shellcheck
+      - name: Install tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install jq dash shellcheck
+      - name: Test with sh
+        run: sh test/run.sh
+      - name: Shell check
+        run: shellcheck bin/refresh.sh test/run.sh test/bin/herdr test/bin/treehouse
+      - name: Use dash as sh
+        run: |
+          mkdir -p "$RUNNER_TEMP/dash-bin"
+          ln -s "$(command -v dash)" "$RUNNER_TEMP/dash-bin/sh"
+          printf '%s\n' "$RUNNER_TEMP/dash-bin" >> "$GITHUB_PATH"
+      - name: Test with dash as sh
+        run: sh test/run.sh
