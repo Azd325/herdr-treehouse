@@ -1,0 +1,36 @@
+#!/bin/sh
+# Fake herdr. FAKE_DIR holds its fixtures and its logs.
+
+case "${1:-} ${2:-}" in
+  'pane list')
+    [ $# -eq 2 ] && exec cat "$FAKE_DIR/pane-list.json"
+    ;;
+  'workspace list')
+    [ $# -eq 2 ] && exec cat "$FAKE_DIR/workspace-list.json"
+    ;;
+  'workspace report-metadata')
+    [ -e "$FAKE_DIR/refuse-reports" ] && exit 1
+    workspace=$3
+    shift 3
+    call=$workspace
+    while [ $# -gt 0 ]; do
+      case $1 in
+        --token)
+          printf '%s set %s\n' "$workspace" "$2" >>"$FAKE_DIR/reports.log"
+          ;;
+        --clear-token)
+          printf '%s clear %s\n' "$workspace" "$2" >>"$FAKE_DIR/reports.log"
+          ;;
+        *)
+          call="$call $1 $2"
+          ;;
+      esac
+      shift 2
+    done
+    printf '%s\n' "$call" >>"$FAKE_DIR/calls.log"
+    exit 0
+    ;;
+esac
+
+printf 'herdr %s\n' "$*" >>"$FAKE_DIR/unexpected.log"
+exit 2

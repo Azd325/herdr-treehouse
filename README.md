@@ -1,0 +1,189 @@
+# herdr-treehouse
+
+A [Herdr](https://herdr.dev) plugin for [Treehouse](https://github.com/kunchenguid/treehouse) worktrees.
+It shows the Treehouse slot of each workspace on its row in the sidebar:
+
+```
+🌳 research#1 · in-use · fm/fix-x
+```
+
+The plugin is read-only.
+It needs no other tool and no change to Treehouse.
+
+## How it works
+
+```
+Herdr event                bin/refresh.sh
+(workspace focused,        1. herdr pane list            directory of each pane
+ workspace created,  --->  2. treehouse status --json    slots of the pool of that directory
+ pane created,             3. herdr workspace list       tokens that each workspace has now
+ pane exited,              4. herdr workspace report-metadata
+ startup,                     only for a workspace with a changed value
+ manual action)                          |
+                                         v
+                           Space row in the sidebar,
+                           as your config.toml sets it
+```
+
+Each run is short and then exits.
+There is no background process and no timer.
+
+## Tokens
+
+All token names start with `th_`.
+
+| Token | Value | Example |
+| --- | --- | --- |
+| `$th_line` | Slot, state and branch in one value | `🌳 research#1 · in-use · fm/fix-x` |
+| `$th_slot` | Project and slot name | `research#1` |
+| `$th_state` | State of the slot | `in-use` |
+| `$th_branch` | Branch of the slot, or `detached` | `fm/fix-x` |
+
+- The project is the last part of the slot path.
+- The state is the `status` value of `treehouse status --json`: `available`, `dirty`, `in-use`, `leased`, `damaged` or `unverified`.
+- A slot without a branch that is not detached (a Jujutsu slot, a damaged slot) has no `$th_branch`.
+- A workspace is in a slot when the directory of one of its panes is in the slot.
+  The directory is `foreground_cwd`, or `cwd` when Herdr reports no `foreground_cwd`.
+  The first such pane in the order of `herdr pane list` gives the tokens.
+- A workspace that is not in a slot has no token. The plugin clears the tokens when a workspace leaves a slot.
+- Herdr keeps 80 characters of a value. The plugin cuts a longer `$th_line` and ends it with `…`.
+
+Treehouse reports `you're here` for the slot that contains the directory of the caller.
+The caller is the plugin, so this value says nothing about your pane.
+The plugin reports `in-use` when that slot has resident processes.
+When that slot has no resident process, `$th_state` is `you're here`.
+
+## Requirements
+
+- Herdr 0.7.5 or newer, on macOS or Linux
+- `treehouse` and `jq` (1.6 or newer) on the `PATH` of the Herdr server
+- A POSIX `sh`
+
+The tests use Treehouse 3.1.2 and Herdr 0.9.3 output.
+
+## Install
+
+Link a local checkout:
+
+```sh
+herdr plugin link /path/to/herdr-treehouse
+herdr plugin list
+```
+
+After the repository is on GitHub, the command is `herdr plugin install Azd325/herdr-treehouse`.
+
+## Configure the sidebar
+
+A plugin cannot put a row in the sidebar and cannot set a colour.
+It reports values only.
+You select the tokens, their order and their style in the Herdr `config.toml`.
+Without these lines the sidebar shows nothing from this plugin.
+
+The default line, in its own row:
+
+```toml
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", "workspace"],
+  ["branch", "git_status"],
+  ["$th_line"],
+]
+```
+
+Your own selection and order, with a colour for each state:
+
+```toml
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", "workspace"],
+  ["branch", "git_status"],
+  [
+    "$th_slot",
+    { token = "$th_state", rules = [
+      { equals = "available", fg = "#98c379" },
+      { equals = "dirty", fg = "#e5c07b" },
+      { equals = "leased", fg = "#c678dd" },
+      { equals = "in-use", fg = "#e06c75" },
+    ] },
+    { token = "$th_branch", dim = true },
+  ],
+]
+```
+
+Herdr puts ` · ` between the values of a row.
+A row without a value does not show, so a workspace outside a slot gets no empty line.
+
+Apply the change:
+
+```sh
+herdr server reload-config
+```
+
+To refresh from a key, bind the action. Select a key that is free in your configuration:
+
+```toml
+[[keys.command]]
+key = "prefix+t"
+type = "plugin_action"
+command = "azd325.treehouse.refresh"
+description = "Treehouse: refresh"
+```
+
+The same action from a shell:
+
+```sh
+herdr plugin action invoke azd325.treehouse.refresh
+```
+
+## Limits
+
+- **Values can be stale between events.** Treehouse changes outside Herdr start no event.
+  A slot that another terminal returns keeps its old value until the next event or the manual action.
+- **Each token has a time limit of 30 minutes.** Herdr removes a token that no run reported in that time, so a wrong value does not stay.
+  A run reports a token only when its value changed. After 15 minutes, the next run reports all tokens again, which starts a new time limit.
+  In a session without an event for 30 minutes, the row disappears until the next event.
+- **The compact sidebar and the mobile sidebar show no tokens.** Herdr applies row layouts only to the expanded desktop sidebar.
+- **Herdr drops all tokens when its server restarts.** The startup hook reports them again.
+- Each run calls `treehouse status --json` one time for each pool that has an open workspace.
+
+## What the plugin does not do
+
+- It runs no Treehouse command other than `treehouse status --json`.
+- It does not rename, move or close a workspace, a tab or a pane.
+- It puts no command on your `PATH`.
+
+## When nothing shows
+
+The plugin exits with status 0 and reports nothing when `treehouse` or `jq` is missing, or when the output of a command has an unknown form.
+It writes one line to the plugin log:
+
+```sh
+herdr plugin log list --plugin azd325.treehouse
+```
+
+## Tests
+
+```sh
+sh test/run.sh
+```
+
+The tests run `bin/refresh.sh` with the fake `herdr` and `treehouse` commands of `test/bin` on a test `PATH`.
+The fixtures in `test/fixtures` have the form of recorded `herdr pane list`, `herdr workspace list` and `treehouse status --json` output, with placeholder paths.
+
+Lint:
+
+```sh
+shellcheck bin/refresh.sh test/run.sh test/bin/herdr test/bin/treehouse
+```
+
+## Uninstall
+
+```sh
+herdr plugin unlink azd325.treehouse
+```
+
+Then remove the `$th_` tokens from `ui.sidebar.spaces.rows`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

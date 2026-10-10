@@ -1,0 +1,22 @@
+#!/bin/sh
+# Fake treehouse. A file .fake-treehouse in the current directory or in a
+# parent names the status fixture of that repository.
+
+if [ "$*" != 'status --json' ]; then
+  printf 'treehouse %s\n' "$*" >>"$FAKE_DIR/unexpected.log"
+  exit 2
+fi
+
+pwd -P >>"$FAKE_DIR/treehouse.log"
+
+dir=$(pwd -P)
+while [ -n "$dir" ]; do
+  if [ -f "$dir/.fake-treehouse" ]; then
+    read -r fixture <"$dir/.fake-treehouse"
+    exec cat "$FAKE_DIR/treehouse/$fixture"
+  fi
+  dir=${dir%/*}
+done
+
+echo 'not in a git or jj repository' >&2
+exit 1

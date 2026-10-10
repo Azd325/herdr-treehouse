@@ -1,0 +1,31 @@
+id = "azd325.treehouse"
+name = "Treehouse"
+version = "0.1.0"
+min_herdr_version = "0.7.5"
+description = "Show the Treehouse worktree slot, state and branch of each workspace in the sidebar"
+platforms = ["macos", "linux"]
+
+[[startup]]
+command = ["sh", "bin/refresh.sh"]
+
+[[actions]]
+id = "refresh"
+title = "Treehouse: refresh"
+contexts = ["workspace"]
+command = ["sh", "bin/refresh.sh"]
+
+[[events]]
+on = "workspace.focused"
+command = ["sh", "bin/refresh.sh"]
+
+[[events]]
+on = "workspace.created"
+command = ["sh", "bin/refresh.sh"]
+
+[[events]]
+on = "pane.created"
+command = ["sh", "bin/refresh.sh"]
+
+[[events]]
+on = "pane.exited"
+command = ["sh", "bin/refresh.sh"]

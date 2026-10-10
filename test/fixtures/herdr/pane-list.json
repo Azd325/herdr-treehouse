@@ -1,0 +1,88 @@
+{
+  "id": "cli:pane:list",
+  "result": {
+    "panes": [
+      {
+        "agent_status": "unknown",
+        "cwd": "@ROOT@/pools/research-6310cd/1/research",
+        "focused": true,
+        "foreground_cwd": "@ROOT@/pools/research-6310cd/1/research",
+        "pane_id": "w1:p1",
+        "revision": 0,
+        "scroll": {
+          "max_offset_from_bottom": 0,
+          "offset_from_bottom": 0,
+          "viewport_rows": 40
+        },
+        "tab_id": "w1:t1",
+        "terminal_id": "term_65d801019aa6b1",
+        "workspace_id": "w1"
+      },
+      {
+        "agent_status": "unknown",
+        "cwd": "@ROOT@/plain",
+        "focused": false,
+        "foreground_cwd": "@ROOT@/plain",
+        "pane_id": "w2:p1",
+        "revision": 0,
+        "scroll": {
+          "max_offset_from_bottom": 0,
+          "offset_from_bottom": 0,
+          "viewport_rows": 40
+        },
+        "tab_id": "w2:t1",
+        "terminal_id": "term_65d80101a4c7c2",
+        "workspace_id": "w2"
+      },
+      {
+        "agent_status": "working",
+        "cwd": "@ROOT@/src/research",
+        "focused": false,
+        "foreground_cwd": "@ROOT@/pools/research-6310cd/2/research",
+        "pane_id": "w3:p1",
+        "revision": 0,
+        "scroll": {
+          "max_offset_from_bottom": 0,
+          "offset_from_bottom": 0,
+          "viewport_rows": 40
+        },
+        "tab_id": "w3:t1",
+        "terminal_id": "term_65d80101b1d3e4",
+        "workspace_id": "w3"
+      },
+      {
+        "agent_status": "unknown",
+        "cwd": "@ROOT@/src/api",
+        "focused": false,
+        "foreground_cwd": "@ROOT@/src/api",
+        "pane_id": "w4:p1",
+        "revision": 0,
+        "scroll": {
+          "max_offset_from_bottom": 0,
+          "offset_from_bottom": 0,
+          "viewport_rows": 40
+        },
+        "tab_id": "w4:t1",
+        "terminal_id": "term_65d80101c2e5f6",
+        "workspace_id": "w4"
+      },
+      {
+        "agent_status": "unknown",
+        "cwd": "@ROOT@/pools/api-9f2c1a/1/api",
+        "focused": false,
+        "foreground_cwd": "@ROOT@/pools/api-9f2c1a/1/api",
+        "pane_id": "w4:p2",
+        "revision": 0,
+        "scroll": {
+          "max_offset_from_bottom": 0,
+          "offset_from_bottom": 0,
+          "viewport_rows": 40
+        },
+        "tab_id": "w4:t1",
+        "terminal_id": "term_65d80101d3f607",
+        "workspace_id": "w4"
+      }
+    ],
+    "type": "pane_list"
+  }
+}
