@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 — 2026-10-10
+## 0.1.1 — 2026-10-11
 
 - Include the tree symbol in `$th_slot`, keeping exactly one symbol in `$th_line`.
 - Keep the symbol and slot name when shortening a long project name to Herdr's
