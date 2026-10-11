@@ -24,7 +24,7 @@ Publication is a separate maintainer decision; this checklist does not authorize
 
 ## Recovery
 
-A published version or tag is never replaced, moved, or re-created. A fault gets a new version.
+A published version or tag is never replaced, moved, or re-created. A fault gets a new version. Enable GitHub immutable releases for this repository before the first release: GitHub then blocks moving or deleting a published tag and changing or deleting its release assets, while the release title and notes stay editable.
 
 The maintainer decides how to recover from a broken release. Choose one:
 
