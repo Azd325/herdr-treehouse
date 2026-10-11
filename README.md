@@ -18,13 +18,12 @@ It needs no other integration tool and no change to Treehouse.
 
 The plugin was seen working in a real Herdr 0.9.3 sidebar on macOS with
 Treehouse 3.1.2 and slots in the `in-use` state. The tests use output from
-those versions. Other states were exercised only in fixture tests. Linux has
-fixture checks configured in CI, but they have not run yet; no live Linux
-sidebar was tested. No GitHub workflow run has happened yet.
+those versions. Other states were exercised only in fixture tests. CI runs the fixture
+tests on Linux and macOS runners. No live Linux sidebar was tested.
 
 ## Install
 
-Once the repository is public on GitHub, install it with:
+Install the plugin from GitHub with:
 
 ```sh
 herdr plugin install Azd325/herdr-treehouse
@@ -67,7 +66,8 @@ rows = [
 ]
 ```
 
-Your own selection and order, with a colour for each state:
+Your own selection and order, with a colour for each state.
+The `rules` key needs Herdr 0.9.0 or newer:
 
 ```toml
 [ui.sidebar.spaces]
@@ -185,8 +185,11 @@ herdr plugin log list --plugin azd325.treehouse
 ## Uninstall
 
 ```sh
-herdr plugin unlink azd325.treehouse
+herdr plugin uninstall azd325.treehouse
 ```
+
+For a local checkout that you linked with `herdr plugin link`, use
+`herdr plugin unlink azd325.treehouse` instead.
 
 Then remove the `$th_` tokens from `ui.sidebar.spaces.rows`.
 
