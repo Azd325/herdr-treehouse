@@ -21,3 +21,16 @@ Publication is a separate maintainer decision; this checklist does not authorize
       changelog notes and no attached binaries. Verify the source archives.
 - [ ] Enable GitHub private vulnerability reporting and add the `herdr-plugin`
       repository topic so Herdr users can discover the plugin.
+
+## Recovery
+
+A published version or tag is never replaced, moved, or re-created. A fault gets a new version.
+
+The maintainer decides how to recover from a broken release. Choose one:
+
+- Point users to the previous working version in the release notes.
+- Publish a corrective patch release: set the next version in `herdr-plugin.toml`, update [CHANGELOG.md](CHANGELOG.md), and repeat the steps above.
+
+Withdrawal does not apply, because this project publishes no package to a registry.
+
+Verify the chosen recovery: run the checks in [CONTRIBUTING.md](CONTRIBUTING.md) on the new commit, verify the new tag with `git verify-tag`, and verify the source archives of the new release. Publishing the tag, the release, or the release notes needs the maintainer's approval. Link the decision from the release notes.
