@@ -87,6 +87,8 @@ rows = [
 ]
 ```
 
+Herdr has no rule yet that hides one value when another value is present, so the example above shows the branch twice; see the [Herdr discussion](https://github.com/herdrdev/herdr/discussions/5167).
+
 Herdr puts ` · ` between the values of a row.
 A row without a value does not show, so a workspace outside a slot gets no empty line.
 

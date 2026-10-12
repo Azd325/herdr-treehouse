@@ -43,9 +43,9 @@ A rule under "Proposals" is not decided.
 
 - Name: `herdr-treehouse`. Plugin id: `azd325.treehouse`.
 - Owner: the GitHub account `Azd325`.
-- The repository is local until publication. The plugin is used for some days first; the publication is a decision of the owner.
+- The repository is public since 2026-10-11. The first release is v0.1.1.
 - After publication, the checks workflow must pass on Linux and macOS, and one install from the public repository must pass in a clean, separate Herdr session.
-- The marketplace topic `herdr-plugin` is a separate last step, on the owner's word.
+- The marketplace topic `herdr-plugin` was added on 2026-10-11 on the owner's word.
 - Licence: MIT.
 - A checks workflow exists since the public-release preparation of 2026-10-10.
 
