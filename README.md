@@ -1,5 +1,7 @@
 # herdr-treehouse
 
+[![CI status](https://img.shields.io/github/actions/workflow/status/Azd325/herdr-treehouse/ci.yml?branch=main)](https://github.com/Azd325/herdr-treehouse/actions/workflows/ci.yml) [![Latest release](https://img.shields.io/github/v/release/Azd325/herdr-treehouse)](https://github.com/Azd325/herdr-treehouse/releases) [![Licence: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A [Herdr](https://herdr.dev) plugin for [Treehouse](https://github.com/kunchenguid/treehouse) worktrees.
 It shows the Treehouse slot of each workspace on its row in the sidebar:
 
